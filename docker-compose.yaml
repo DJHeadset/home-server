@@ -1,0 +1,62 @@
+
+services:
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    volumes:
+      - /srv/homeassistant/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=Europe/Budapest
+    ports:
+      - "8123:8123"
+    restart: unless-stopped
+
+  backend:
+    image: djheadset/the_old_one:latest 
+    container_name: backend 
+    volumes:
+      - /srv/backend/data:/app/data
+      - /srv/backend/excel:/app/excel
+      - /srv/logs/az_oreg_naploja:/app/logs
+    environment:
+    - TZ=Europe/Budapest 
+    restart: unless-stopped 
+    ports:
+    - "5000:5000"
+
+  wireguard:
+    image: linuxserver/wireguard
+    container_name: wireguard
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Budapest
+      - SERVERURL=87.97.118.15
+      - SERVERPORT=51820
+      - PEERS=2
+      - PEERDNS=1.1.1.1
+      - INTERNAL_SUBNET=10.13.13.0/24
+    volumes:
+      - /srv/wireguard:/config
+      - /lib/modules:/lib/modules
+    restart: unless-stopped
+
+  samba:
+    image: dperson/samba:latest
+    container_name: samba
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - TZ=Europe/Budapest
+    volumes:
+      - /srv/logs/az_oreg_naploja:/mount/logs:ro
+      - /srv/backend/excel:/mount/excel:rw
+    command: >
+      -s "Logs;/mount/logs;yes;no;no;all;none;all"
+      -s "Chores;/mount/excel;yes;no;no;all;none;all"
+      -u "family;password123"

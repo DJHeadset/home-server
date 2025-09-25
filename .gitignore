@@ -1,0 +1,9 @@
+*.log
+*.txt
+*.bak
+*.db
+*.sqlite
+*.json
+*.env
+*.config
+secrets.yaml

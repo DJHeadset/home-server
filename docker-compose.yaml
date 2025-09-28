@@ -18,7 +18,7 @@ services:
     volumes:
       - /srv/backend/data:/app/data
       - /srv/backend/excel:/app/excel
-      - /srv/logs/az_oreg_naploja:/app/logs
+      - /srv/backend/logs:/app/logs
     environment:
     - TZ=Europe/Budapest 
     restart: unless-stopped 
@@ -42,21 +42,21 @@ services:
       - PEERDNS=1.1.1.1
       - INTERNAL_SUBNET=10.13.13.0/24
     volumes:
-      - /srv/wireguard:/config
+      - /srv/wireguard/config:/config
       - /lib/modules:/lib/modules
     restart: unless-stopped
 
   samba:
     image: dperson/samba:latest
     container_name: samba
-    restart: unless-stopped
     network_mode: host
     environment:
       - TZ=Europe/Budapest
     volumes:
-      - /srv/logs/az_oreg_naploja:/mount/logs:ro
+      - /srv/backend/logs:/mount/logs:ro
       - /srv/backend/excel:/mount/excel:rw
     command: >
       -s "Logs;/mount/logs;yes;no;no;all;none;all"
       -s "Chores;/mount/excel;yes;no;no;all;none;all"
       -u "family;password123"
+    restart: unless-stopped
